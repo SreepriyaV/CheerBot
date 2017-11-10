@@ -7,6 +7,37 @@ const request = require('request');
 
 const apiAiClient = require('apiai')(API_AI_TOKEN);
 
+const sendImage = (senderId, imageUri) => {
+    return request({
+        url: 'https://graph.facebook.com/v2.6/me/messages',
+        qs: { access_token: FACEBOOK_ACCESS_TOKEN },
+        method: 'POST',
+        json: {
+            recipient: { id: senderId },
+            message: {
+                attachment: {
+                    type: 'image',
+                    payload: { url: imageUri }
+                }
+            }
+        }
+    });
+};
+
+const sendJoke = (senderId, jokeText) => {
+    console.log("postingngtofb", jokeText);
+    return request({
+        url: 'https://graph.facebook.com/v2.6/me/messages',
+        qs: { access_token: FACEBOOK_ACCESS_TOKEN },
+        method: 'POST',
+        json: {
+            recipient: { id: senderId },
+             message: { text: jokeText },
+        }
+    });
+};
+
+
 const sendTextMessage = (senderId, text) => {
     console.log(text);
     request({
@@ -31,12 +62,20 @@ module.exports = (event) => {
 
     const apiaiSession = apiAiClient.textRequest(message, {sessionId: 'CheerBot_co'});
 
-    apiaiSession.on('response', (response) => {
-       console.log("i m here")
+   apiaiSession.on('response', (response) => {
         const result = response.result.fulfillment.speech;
-         console.log(result);
-        sendTextMessage(senderId, result);
+
+        if (response.result.metadata.intentName === 'images.search') {
+            sendImage(senderId, result);
+        } else if (response.result.metadata.intentName === 'jokes.search') {
+            sendJoke(senderId, result);
+        }
+        
+        else {
+            sendTextMessage(senderId, result);
+        }
     });
+
 
     apiaiSession.on('error', error => console.log(error));
     apiaiSession.end();
