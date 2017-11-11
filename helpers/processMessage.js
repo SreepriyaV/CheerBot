@@ -37,6 +37,23 @@ const sendJoke = (senderId, jokeText) => {
     });
 };
 
+const sendGif = (senderId, gifUri) => {
+    console.log("from front", gifUri)
+    return request({
+        url: 'https://graph.facebook.com/v2.6/me/messages',
+        qs: { access_token: FACEBOOK_ACCESS_TOKEN },
+        method: 'POST',
+        json: {
+            recipient: { id: senderId },
+            message: {
+                attachment: {
+                    type: 'image',
+                    payload: { url: gifUri }
+                }
+            }
+        }
+    });
+};
 
 const sendTextMessage = (senderId, text) => {
     console.log(text);
@@ -69,6 +86,9 @@ module.exports = (event) => {
             sendImage(senderId, result);
         } else if (response.result.metadata.intentName === 'jokes.search') {
             sendJoke(senderId, result);
+        }
+        else if (response.result.metadata.intentName === 'gifs.search') {
+            sendGif(senderId, result);
         }
         
         else {
