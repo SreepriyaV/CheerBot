@@ -5,6 +5,9 @@ const request = require('request');
 module.exports = (req, res) => {
     if (req.body.result.action === 'image') {
         const imageName = req.body.result.parameters['image_name'];
+       if(imageName) {
+        console.log("img",imageName);
+
         const apiUrl = 'https://api.gettyimages.com/v3/search/images?fields=id,title,thumb,referral_destinations&sort_order=best&phrase=' + imageName;
 
         request({
@@ -13,7 +16,7 @@ module.exports = (req, res) => {
             headers: {'Api-Key': GETTY_IMAGES_API_KEY}
         }, (err, response, body) => {
             const imageUri = JSON.parse(body).images[0].display_sizes[0].uri;
-console.log("img",JSON.parse(body).images[0].display_sizes[0]);
+
             return res.json({
                 speech: imageUri,
                 displayText: imageUri,
@@ -21,6 +24,19 @@ console.log("img",JSON.parse(body).images[0].display_sizes[0]);
             });
         })
     }
+
+    else
+        {
+             request({}, (err, response, body) => {
+
+            return res.json({
+                speech: "Sorry, can you say that again?",
+                displayText: "Sorry, can you say that again?",
+                source: 'image_name'
+            });
+        })
+        }
+}
 
     else  if (req.body.result.action === 'joke') {
         const jokeName = req.body.result.parameters['joke_name'];

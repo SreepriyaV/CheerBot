@@ -83,7 +83,10 @@ module.exports = (event) => {
         const result = response.result.fulfillment.speech;
 
         if (response.result.metadata.intentName === 'images.search') {
-            sendImage(senderId, result);
+            if(result=="Sorry, can you say that again?")
+                {sendTextMessage(senderId, result);}
+            else
+            {sendImage(senderId, result);}
         } else if (response.result.metadata.intentName === 'jokes.search') {
             sendJoke(senderId, result);
         }
